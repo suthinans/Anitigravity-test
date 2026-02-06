@@ -177,8 +177,49 @@
                             <label for="otherDeduction">ลดหย่อนอื่นๆ รวม</label>
                             <div class="input-wrapper">
                                 <span class="currency">฿</span>
-                                <input type="number" id="otherDeduction" placeholder="เช่น RMF, SSF">
+                                <input type="number" id="otherDeduction" placeholder="เช่น RMF, SSF, Thai ESG">
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="divider-sm"></div>
+
+                    <h3 class="subsection-title">เงินบริจาค (Donations)</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label for="donationGeneral">บริจาคทั่วไป (1x)</label>
+                            <div class="input-wrapper">
+                                <span class="currency">฿</span>
+                                <input type="number" id="donationGeneral" placeholder="มูลนิธิ, วัด, สมาคม">
+                            </div>
+                            <span class="hint">ลดหย่อนได้ตามจริง ไม่เกิน 10% ของเงินได้สุทธิ</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="donationSpecial">บริจาคการศึกษา/กีฬา (2x)</label>
+                            <div class="input-wrapper">
+                                <span class="currency">฿</span>
+                                <input type="number" id="donationSpecial" placeholder="e-Donation">
+                            </div>
+                            <span class="hint">ลดหย่อนได้ 2 เท่า แต่รวมกันไม่เกิน 10% ของเงินได้สุทธิ</span>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="divider"></div>
+
+                <!-- Section 4: Tax Credits -->
+                <section class="form-section">
+                    <div class="section-header">
+                        <div class="icon-box">
+                            <i data-lucide="receipt"></i>
+                        </div>
+                        <h2>ข้อมูลการชำระภาษี</h2>
+                    </div>
+                    <div class="input-group">
+                        <label for="withholdingTax">ภาษีหัก ณ ที่จ่าย (สะสมทั้งปี)</label>
+                        <div class="input-wrapper">
+                            <span class="currency">฿</span>
+                            <input type="number" id="withholdingTax" placeholder="ระบุจำนวนเงินที่ถูกหักไปแล้ว">
                         </div>
                     </div>
                 </section>
@@ -199,7 +240,7 @@
         <div id="resultCard" class="result-card glass-panel hidden">
             <div class="result-header">
                 <h2>สรุปภาษีที่ต้องจ่าย</h2>
-                <div class="tax-yearBadge">ปีภาษี 2567</div>
+                <div class="tax-yearBadge">ปีภาษี 2569</div>
             </div>
 
             <div class="summary-grid">

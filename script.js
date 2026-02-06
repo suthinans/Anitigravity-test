@@ -69,25 +69,60 @@ document.getElementById('calculateBtn').addEventListener('click', () => {
     const providentFund = getVal('providentFund');
     const otherDeduction = getVal('otherDeduction');
 
+    // Donations & Tax Credits
+    const donationGeneral = getVal('donationGeneral');
+    const donationSpecial = getVal('donationSpecial'); // 2x
+    const withholdingTax = getVal('withholdingTax');
+
     const totalRevenue = salary + otherIncome;
 
-    // 2. Calculate Deductions
-    // Personal deduction is fixed at 60,000
+    // 2. Calculate Deductions (Pre-Donation)
     const personalDeduction = 60000;
     const spouseDeduction = hasSpouse ? 60000 : 0;
     const childDeductionAmount = childCount * 30000;
     const parentDeduction = (hasFather ? 30000 : 0) + (hasMother ? 30000 : 0);
 
-    // Safety caps
-    const totalDeductions = personalDeduction + spouseDeduction + childDeductionAmount + parentDeduction +
+    const initialDeductions = personalDeduction + spouseDeduction + childDeductionAmount + parentDeduction +
         socialSecurity + lifeInsurance + providentFund + otherDeduction;
 
-    // 3. Net Income
-    // Net Income cannot be less than 0
-    let netIncome = totalRevenue - expenses - totalDeductions;
+    // 3. Net Income Before Donation
+    let netIncomeBeforeDonation = totalRevenue - expenses - initialDeductions;
+    if (netIncomeBeforeDonation < 0) netIncomeBeforeDonation = 0;
+
+    // 4. Calculate Donations
+    // Step 1: Net Income = Rev - Exp - Deductions
+    // Donation Cap Logic: 10% of Net Income AFTER deductic previous donations...
+    // But commonly:
+    // Limit is 10% of (Revenue - Expenses - Other Deductions)
+
+    const donationLimit = netIncomeBeforeDonation * 0.10;
+
+    let actualDonationDeduction = 0;
+
+    // 2x Donation
+    let donationSpecialDeduct = donationSpecial * 2;
+    if (donationSpecialDeduct > donationLimit) {
+        donationSpecialDeduct = donationLimit;
+    }
+
+    // Remaining Net Income for General Donation
+    // Techincally General Donation is 10% of (Net Income - Special Donation Deduct)
+    const remainingForGeneral = netIncomeBeforeDonation - donationSpecialDeduct;
+    const generalLimit = remainingForGeneral * 0.10;
+
+    let donationGeneralDeduct = donationGeneral;
+    if (donationGeneralDeduct > generalLimit) {
+        donationGeneralDeduct = generalLimit;
+    }
+
+    const totalDonationDeduct = donationSpecialDeduct + donationGeneralDeduct;
+    const totalDeductions = initialDeductions + totalDonationDeduct;
+
+    // 5. Final Net Income
+    let netIncome = netIncomeBeforeDonation - totalDonationDeduct;
     if (netIncome < 0) netIncome = 0;
 
-    // 4. Calculate Tax (Progressive)
+    // 6. Calculate Tax (Progressive)
     const taxBrackets = [
         { limit: 150000, rate: 0 },
         { limit: 300000, rate: 0.05 },
@@ -148,13 +183,39 @@ document.getElementById('calculateBtn').addEventListener('click', () => {
         }
     }
 
-    // 5. Display Results
+    // 7. Final Tax Due (Post Withholding)
+    const finalTaxDue = taxPayable - withholdingTax;
+
+    // 8. Display Results
     document.getElementById('netIncomeDisplay').innerText = formatMoney(netIncome);
-    document.getElementById('taxPayableDisplay').innerText = formatMoney(taxPayable);
+
+    // Update Result Card for Refund/Due
+    const taxLabel = document.querySelector('.summary-item.highlight span');
+    const taxValue = document.getElementById('taxPayableDisplay');
+    const resultCard = document.getElementById('resultCard');
+
+    // Reset styles
+    taxValue.style.color = "";
+
+    if (finalTaxDue < 0) {
+        // Refund
+        taxLabel.innerText = "ภาษีที่ชำระเกิน (ขอคืนได้)";
+        taxValue.innerText = formatMoney(Math.abs(finalTaxDue));
+        taxValue.style.color = "#10b981"; // Green
+    } else {
+        // Must Pay
+        taxLabel.innerText = "ภาษีที่ต้องชำระเพิ่ม";
+        taxValue.innerText = formatMoney(finalTaxDue);
+        taxValue.style.color = "#ef4444"; // Red
+        if (Math.abs(finalTaxDue) < 0.01) {
+            taxValue.style.color = "#4f46e5";
+            taxLabel.innerText = "ภาษีที่ต้องชำระ"; // Zero
+        }
+    }
+
     document.getElementById('taxBreakdownList').innerHTML = breakdownHTML.join('');
 
     // Show and scroll
-    const resultCard = document.getElementById('resultCard');
     resultCard.classList.remove('hidden');
     resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
